@@ -26,7 +26,7 @@ app.post('/send-email', async (req, res) => {
 
   try {
     await transporter.sendMail({
-      from: '"Your App" <yourgmail@gmail.com>',
+      from: '"SWTV" <yourgmail@gmail.com>',
       to,
       subject,
       text: message
