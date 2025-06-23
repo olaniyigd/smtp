@@ -3,10 +3,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const path = require('path');
-
+const cors = require('cors');
 const app = express();
 const PORT = 3000;
 
+app.use(cors());
 // Serve frontend
 app.use(express.static('public'));
 app.use(bodyParser.json());
