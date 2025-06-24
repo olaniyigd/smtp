@@ -34,7 +34,7 @@ app.post('/send-email', upload.single('pdf'), async (req, res) => {
 
   // Email configuration
   let mailOptions = {
-    from: '"SWTV" <swtv901@gmail.com>',
+    from: '"swtv" <swtv901@gmail.com>',
     to,
     subject,
     text: message,
