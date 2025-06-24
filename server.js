@@ -4,6 +4,9 @@ const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const cors = require('cors');
+const multer = require('multer');
+const fs = require('fs');
+
 const app = express();
 const PORT = 3000;
 
@@ -11,12 +14,16 @@ app.use(cors());
 // Serve frontend
 app.use(express.static('public'));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// POST endpoint to send mail
-app.post('/send-email', async (req, res) => {
+// Set up Multer for optional PDF upload
+const upload = multer({ dest: 'uploads/' });
+
+// POST endpoint to send mail with optional PDF
+app.post('/send-email', upload.single('pdf'), async (req, res) => {
   const { to, subject, message } = req.body;
+  const file = req.file;
 
-  // Replace with your real SMTP credentials
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -25,13 +32,33 @@ app.post('/send-email', async (req, res) => {
     }
   });
 
-  try {
-    await transporter.sendMail({
-      from: '"SWTV" <yourgmail@gmail.com>',
-      to,
-      subject,
-      text: message
+  // Email configuration
+  let mailOptions = {
+    from: '"SWTV" <swtv901@gmail.com>',
+    to,
+    subject,
+    text: message,
+    attachments: []
+  };
+
+  // Add PDF if it exists
+  if (file) {
+    mailOptions.attachments.push({
+      filename: file.originalname,
+      path: file.path,
+      contentType: 'application/pdf'
     });
+  }
+
+  try {
+    await transporter.sendMail(mailOptions);
+
+    // Delete uploaded file after sending
+    if (file) {
+      fs.unlink(file.path, (err) => {
+        if (err) console.error('Error deleting temp file:', err);
+      });
+    }
 
     res.status(200).json({ message: 'Email sent successfully!' });
   } catch (err) {
